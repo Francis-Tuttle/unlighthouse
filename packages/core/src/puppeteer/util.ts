@@ -14,17 +14,6 @@ export async function setupPage(page: Page) {
   if (resolvedConfig.auth)
     await page.authenticate(resolvedConfig.auth).catch(softErrorHandler('Failed to authenticate'))
 
-  // set local storage
-  if (resolvedConfig.localStorage) {
-    await page.evaluateOnNewDocument(
-      (data) => {
-        localStorage.clear()
-        for (const key in data)
-          localStorage.setItem(key, data[key])
-      },
-      resolvedConfig.localStorage,
-    )
-  }
   // set session storage
   if (resolvedConfig.sessionStorage) {
     await page.evaluateOnNewDocument(
@@ -55,6 +44,16 @@ export async function setupPage(page: Page) {
           .catch(softErrorHandler('Failed to set cookies'))
       }
       // set local storage
+      if (resolvedConfig.localStorage) {
+        await page.evaluate(
+          (data) => {
+            localStorage.clear()
+            for (const key in data)
+              localStorage.setItem(key, data[key])
+          },
+          resolvedConfig.localStorage,
+        )
+      }
       if (resolvedConfig.extraHeaders) {
         await page.setExtraHTTPHeaders(resolvedConfig.extraHeaders)
           .catch(softErrorHandler('Failed to set extra headers'))
